@@ -6,10 +6,10 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/kklab-com/gone-httpheadername"
-	"github.com/kklab-com/gone-httpstatus"
 	"github.com/kklab-com/gone-core/channel"
 	"github.com/kklab-com/gone-http/http/httpmethod"
+	"github.com/kklab-com/gone-httpheadername"
+	"github.com/kklab-com/gone-httpstatus"
 	"github.com/kklab-com/goth-erresponse"
 	"github.com/kklab-com/goth-kklogger"
 	"github.com/kklab-com/goth-kkutil/buf"
@@ -206,6 +206,7 @@ func (h *DispatchHandler) invokeMethod(ctx channel.HandlerContext, task HttpHand
 	}
 
 	if invokeErr := func() ErrorResponse {
+		defer task.CORSHelper(request, response, params)
 		switch {
 		case request.Method() == httpmethod.GET:
 			if isLast {

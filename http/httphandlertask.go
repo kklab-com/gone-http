@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/kklab-com/gone-core/channel"
+	httpheadername "github.com/kklab-com/gone-httpheadername"
 	"github.com/kklab-com/goth-erresponse"
 )
 
@@ -26,6 +27,7 @@ type HandlerTask interface {
 
 type HttpHandlerTask interface {
 	HttpTask
+	CORSHelper(req *Request, resp *Response, params map[string]interface{})
 	PreCheck(req *Request, resp *Response, params map[string]interface{}) ErrorResponse
 	Before(req *Request, resp *Response, params map[string]interface{}) ErrorResponse
 	After(req *Request, resp *Response, params map[string]interface{}) ErrorResponse
@@ -76,6 +78,22 @@ func (h *DefaultHTTPHandlerTask) Connect(ctx channel.HandlerContext, req *Reques
 
 func (h *DefaultHTTPHandlerTask) ThrowErrorResponse(err ErrorResponse) {
 	panic(err)
+}
+
+func (h *DefaultHTTPHandlerTask) CORSHelper(req *Request, resp *Response, params map[string]interface{}) {
+	if req.Origin() == "null" {
+		resp.Header().Set(httpheadername.AccessControlAllowOrigin, "*")
+	} else {
+		resp.Header().Set(httpheadername.AccessControlAllowOrigin, req.Origin())
+	}
+
+	if str := req.Header().Get(httpheadername.AccessControlRequestHeaders); str != "" {
+		resp.Header().Set(httpheadername.AccessControlAllowHeaders, str)
+	}
+
+	if str := req.Header().Get(httpheadername.AccessControlRequestMethod); str != "" {
+		resp.Header().Set(httpheadername.AccessControlAllowMethods, str)
+	}
 }
 
 func (h *DefaultHTTPHandlerTask) PreCheck(req *Request, resp *Response, params map[string]interface{}) ErrorResponse {
