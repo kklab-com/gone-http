@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/google/uuid v1.1.1
-	github.com/kklab-com/gone-core v1.0.10
+	github.com/kklab-com/gone-core v1.0.11
 	github.com/kklab-com/gone-httpheadername v0.0.0-20210329103811-5b020e1d815f
 	github.com/kklab-com/gone-httpstatus v0.0.0-20210329103101-07f17310ce7c
 	github.com/kklab-com/goth-base62 v1.0.0
