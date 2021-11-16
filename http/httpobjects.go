@@ -14,18 +14,16 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/kklab-com/gone-httpheadername"
-	"github.com/kklab-com/gone-httpstatus"
 	"github.com/kklab-com/gone-core/channel"
 	"github.com/kklab-com/gone-http/http/httpsession"
+	"github.com/kklab-com/gone-httpheadername"
+	"github.com/kklab-com/gone-httpstatus"
 	"github.com/kklab-com/goth-base62"
 	"github.com/kklab-com/goth-kklogger"
 	"github.com/kklab-com/goth-kkutil/buf"
 	"github.com/kklab-com/goth-kkutil/validate"
 	"golang.org/x/text/language"
 )
-
-const MaxMultiPartMemory = 1024 * 1024 * 256
 
 type Request struct {
 	request     *http.Request
@@ -293,6 +291,7 @@ type Response struct {
 	header     http.Header
 	cookies    map[string][]http.Cookie
 	body       buf.ByteBuf
+	done       channel.Future
 }
 
 func WrapResponse(ch channel.NetChannel, response *http.Response) *Response {
@@ -303,6 +302,7 @@ func WrapResponse(ch channel.NetChannel, response *http.Response) *Response {
 		},
 		statusCode: response.StatusCode,
 		header:     response.Header,
+		done:       channel.NewFuture(ch),
 	}
 
 	return resp
@@ -319,6 +319,7 @@ func NewResponse(request *Request) *Response {
 	response.header = map[string][]string{}
 	response.cookies = map[string][]http.Cookie{}
 	response.body = buf.EmptyByteBuf()
+	response.done = channel.NewFuture(request.Channel())
 	return response
 }
 
@@ -328,6 +329,10 @@ func EmptyResponse() *Response {
 	response.cookies = map[string][]http.Cookie{}
 	response.body = buf.EmptyByteBuf()
 	return response
+}
+
+func (r *Response) DoneFuture() channel.Future {
+	return r.done
 }
 
 func (r *Response) ResponseError(er ErrorResponse) {

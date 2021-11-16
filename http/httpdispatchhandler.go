@@ -138,7 +138,7 @@ func (h *DispatchHandler) callWrite(ctx channel.HandlerContext, obj interface{})
 		}
 	}
 
-	ctx.Write(obj, nil).Sync()
+	ctx.Write(obj, pack.Response.done).Sync()
 }
 
 func (h *DispatchHandler) _PanicCatch(ctx channel.HandlerContext, request *Request, response *Response, task HttpHandlerTask, params map[string]interface{}, rtnCatch *ReturnCatch) {
