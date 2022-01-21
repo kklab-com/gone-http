@@ -13,7 +13,7 @@ import (
 
 	"github.com/kklab-com/gone-core/channel"
 	"github.com/kklab-com/gone-http/http"
-	"github.com/kklab-com/gone-httpheadername"
+	httpheadername "github.com/kklab-com/gone-httpheadername"
 	"github.com/kklab-com/goth-kklogger"
 	"github.com/kklab-com/goth-kkutil/buf"
 	"github.com/kklab-com/goth-kkutil/concurrent"
@@ -49,7 +49,9 @@ func TestServer_Start(t *testing.T) {
 		ch.Pipeline().AddLast("INDICATE_HANDLER_OUTBOUND", &channel.IndicateHandlerOutbound{})
 	}))
 
+	clientCountHandler := &ServerChildCountHandler{}
 	bootstrap.ChildHandler(channel.NewInitializer(func(ch channel.Channel) {
+		ch.Pipeline().AddLast("CLIENT_COUNT_HANDLER", clientCountHandler)
 		ch.Pipeline().AddLast("INDICATE_HANDLER_INBOUND", &channel.IndicateHandlerInbound{})
 		ch.Pipeline().AddLast("NET_STATUS_INBOUND", &channel.NetStatusInbound{})
 		ch.Pipeline().AddLast("GZIP_HANDLER", new(http.GZipHandler))
@@ -125,7 +127,7 @@ func TestServer_Start(t *testing.T) {
 		}()
 	}
 
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 5; i++ {
 		go func() {
 			wg.Add(1)
 			if rtn, err := http2.DefaultClient.Get("http://localhost:18080/v1/home"); err != nil {
@@ -153,7 +155,7 @@ func TestServer_Start(t *testing.T) {
 
 	wg.Wait()
 
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 50; i++ {
 		go func() {
 			wg.Add(1)
 			request, _ := http2.NewRequest("POST", "http://localhost:18080", nil)
@@ -182,5 +184,6 @@ func TestServer_Start(t *testing.T) {
 	}()
 
 	ch.CloseFuture().Sync()
-	time.Sleep(time.Second / 2)
+	assert.Equal(t, int32(0), clientCountHandler.regTrigCount)
+	assert.Equal(t, int32(0), clientCountHandler.actTrigCount)
 }

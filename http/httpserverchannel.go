@@ -93,7 +93,7 @@ func (c *ServerChannel) UnsafeBind(localAddr net.Addr) error {
 				if v, f := c.chMap.LoadAndDelete(conn); f {
 					ch := v.(channel.NetChannel)
 					kklogger.TraceJ("http:ServerChannel.StateClosed", fmt.Sprintf("channel_id: %s", ch.ID()))
-					if ch.Conn().IsActive() {
+					if ch.IsActive() {
 						ch.Deregister()
 					}
 				}

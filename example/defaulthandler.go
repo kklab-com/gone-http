@@ -33,7 +33,9 @@ func (l *DefaultHomeTask) Get(ctx channel.HandlerContext, req *http.Request, res
 	resp.TextResponse(buf.NewByteBuf([]byte(req.RequestURI())))
 	go func() {
 		<-time.After(time.Millisecond * 100)
-		ctx.Channel().Disconnect()
+		if ctx.Channel().IsActive() {
+			ctx.Channel().Disconnect()
+		}
 	}()
 
 	return nil
