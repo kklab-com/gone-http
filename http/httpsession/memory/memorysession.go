@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/kklab-com/gone-http/http/httpsession"
-	"github.com/kklab-com/goth-kkutil/buf"
+	buf "github.com/kklab-com/goth-bytebuf"
 )
 
 type Session struct {

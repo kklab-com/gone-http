@@ -19,8 +19,8 @@ import (
 	"github.com/kklab-com/gone-httpheadername"
 	"github.com/kklab-com/gone-httpstatus"
 	"github.com/kklab-com/goth-base62"
+	buf "github.com/kklab-com/goth-bytebuf"
 	"github.com/kklab-com/goth-kklogger"
-	"github.com/kklab-com/goth-kkutil/buf"
 	"github.com/kklab-com/goth-kkutil/validate"
 	"golang.org/x/text/language"
 )

@@ -7,7 +7,7 @@ import (
 	"github.com/kklab-com/gone-core/channel"
 	"github.com/kklab-com/gone-http/http"
 	"github.com/kklab-com/gone-httpstatus"
-	"github.com/kklab-com/goth-kkutil/buf"
+	buf "github.com/kklab-com/goth-bytebuf"
 )
 
 type DefaultTask struct {

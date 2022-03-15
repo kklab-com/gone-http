@@ -10,9 +10,9 @@ import (
 	"github.com/kklab-com/gone-http/http/httpmethod"
 	"github.com/kklab-com/gone-httpheadername"
 	"github.com/kklab-com/gone-httpstatus"
+	buf "github.com/kklab-com/goth-bytebuf"
 	"github.com/kklab-com/goth-erresponse"
 	"github.com/kklab-com/goth-kklogger"
-	"github.com/kklab-com/goth-kkutil/buf"
 	"github.com/kklab-com/goth-kkutil/hash"
 	kkpanic "github.com/kklab-com/goth-panic"
 )

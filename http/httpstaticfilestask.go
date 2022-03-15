@@ -9,11 +9,11 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/kklab-com/gone-core/channel"
 	"github.com/kklab-com/gone-httpheadername"
 	"github.com/kklab-com/gone-httpstatus"
-	"github.com/kklab-com/gone-core/channel"
+	buf "github.com/kklab-com/goth-bytebuf"
 	"github.com/kklab-com/goth-kklogger"
-	"github.com/kklab-com/goth-kkutil/buf"
 	"github.com/tdewolff/minify/v2"
 	"github.com/tdewolff/minify/v2/css"
 	"github.com/tdewolff/minify/v2/html"

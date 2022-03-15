@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/kklab-com/gone-http/http/httpsession"
 	"github.com/kklab-com/goth-base62"
+	buf "github.com/kklab-com/goth-bytebuf"
 	"github.com/kklab-com/goth-kkutil"
-	"github.com/kklab-com/goth-kkutil/buf"
 )
 
 type Session struct {

@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kklab-com/gone-httpheadername"
 	"github.com/kklab-com/gone-core/channel"
-	"github.com/kklab-com/goth-kkutil/buf"
+	"github.com/kklab-com/gone-httpheadername"
+	buf "github.com/kklab-com/goth-bytebuf"
 )
 
 type GZipHandler struct {
