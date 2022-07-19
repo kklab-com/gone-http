@@ -65,6 +65,7 @@ func (h *DispatchHandler) Read(ctx channel.HandlerContext, obj interface{}) {
 		defer h.callWrite(ctx, obj)
 		defer h._UpdateSessionCookie(response)
 		defer h._PanicCatch(ctx, request, response, task, params, &rtnCatch)
+		defer task.CORSHelper(request, response, params)
 		timeMark = time.Now()
 		for _, acceptance := range node.AggregatedAcceptances() {
 			if err := acceptance.Do(request, response, params); err != nil {
@@ -206,7 +207,6 @@ func (h *DispatchHandler) invokeMethod(ctx channel.HandlerContext, task HttpHand
 	}
 
 	if invokeErr := func() ErrorResponse {
-		defer task.CORSHelper(request, response, params)
 		switch {
 		case request.Method() == httpmethod.GET:
 			if isLast {
