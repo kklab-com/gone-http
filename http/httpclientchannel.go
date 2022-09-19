@@ -14,11 +14,11 @@ func (c *Channel) UnsafeIsAutoRead() bool {
 	return false
 }
 
-func (c *Channel) UnsafeRead() (interface{}, error) {
+func (c *Channel) UnsafeRead() (any, error) {
 	return nil, nil
 }
 
-func (c *Channel) UnsafeWrite(obj interface{}) error {
+func (c *Channel) UnsafeWrite(obj any) error {
 	pack := _UnPack(obj)
 	if pack == nil {
 		return channel.ErrUnknownObjectType

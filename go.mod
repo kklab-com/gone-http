@@ -1,15 +1,15 @@
 module github.com/kklab-com/gone-http
 
-go 1.17
+go 1.18
 
 require (
 	github.com/google/uuid v1.1.1
-	github.com/kklab-com/gone-core v1.1.9
+	github.com/kklab-com/gone-core v1.2.2
 	github.com/kklab-com/gone-httpheadername v0.0.0-20210329135429-db3f484c9117
 	github.com/kklab-com/gone-httpstatus v0.0.0-20210329135420-5f09bea125ca
 	github.com/kklab-com/goth-base62 v1.0.0
 	github.com/kklab-com/goth-bytebuf v1.0.1
-	github.com/kklab-com/goth-concurrent v1.1.0
+	github.com/kklab-com/goth-concurrent v1.2.0
 	github.com/kklab-com/goth-erresponse v1.0.0
 	github.com/kklab-com/goth-kkdatastore v0.0.0-20220207053650-75eea60fcd9b
 	github.com/kklab-com/goth-kklogger v1.0.1
@@ -42,7 +42,7 @@ require (
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/tdewolff/parse/v2 v2.4.2 // indirect
 	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c // indirect
-	golang.org/x/sys v0.0.0-20191228213918-04cbcbbfeed8 // indirect
+	golang.org/x/sys v0.0.0-20220915200043-7b5979e65e41 // indirect
 	google.golang.org/appengine v1.5.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect

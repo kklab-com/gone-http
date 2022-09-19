@@ -29,7 +29,7 @@ func _NewMemorySession(expire *time.Time) *Session {
 	return &session
 }
 
-func (s *Session) GetStruct(key string, obj interface{}) {
+func (s *Session) GetStruct(key string, obj any) {
 	data, right := s.data[key]
 	if !right {
 		return
@@ -70,7 +70,7 @@ func (s *Session) PutInt64(key string, value int64) httpsession.Session {
 	return s
 }
 
-func (s *Session) PutStruct(key string, value interface{}) httpsession.Session {
+func (s *Session) PutStruct(key string, value any) httpsession.Session {
 	if marshal, e := json.Marshal(value); e == nil {
 		s.data[key] = string(marshal)
 	}

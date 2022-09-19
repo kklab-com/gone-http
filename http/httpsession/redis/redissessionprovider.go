@@ -33,7 +33,7 @@ func _Init() {
 	})
 }
 
-func _LoadRedisSession(key string) interface{} {
+func _LoadRedisSession(key string) any {
 	if entityBytes := _LoadRedisSessionEntity(key); entityBytes == nil {
 		return nil
 	} else {

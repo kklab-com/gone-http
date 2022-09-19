@@ -31,7 +31,7 @@ func (h *ServerChildCountHandler) Inactive(ctx channel.HandlerContext) {
 	ctx.FireInactive()
 }
 
-func (h *ServerChildCountHandler) Write(ctx channel.HandlerContext, obj interface{}, future channel.Future) {
+func (h *ServerChildCountHandler) Write(ctx channel.HandlerContext, obj any, future channel.Future) {
 	ctx.Write(obj, future)
 }
 

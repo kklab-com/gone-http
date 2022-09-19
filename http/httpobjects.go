@@ -415,7 +415,7 @@ func (r *Response) TextResponse(buf buf.ByteBuf) {
 		SetBody(buf)
 }
 
-func (r *Response) JsonResponse(obj interface{}) {
+func (r *Response) JsonResponse(obj any) {
 	r.SetHeader(httpheadername.ContentType, "application/json")
 
 	switch body := obj.(type) {
@@ -442,14 +442,14 @@ type ResponseWriter interface {
 }
 
 type Pack struct {
-	Request   *Request               `json:"request"`
-	Response  *Response              `json:"response"`
-	RouteNode RouteNode              `json:"route_node"`
-	Params    map[string]interface{} `json:"params"`
-	Writer    ResponseWriter         `json:"writer"`
+	Request   *Request       `json:"request"`
+	Response  *Response      `json:"response"`
+	RouteNode RouteNode      `json:"route_node"`
+	Params    map[string]any `json:"params"`
+	Writer    ResponseWriter `json:"writer"`
 }
 
-func _UnPack(obj interface{}) *Pack {
+func _UnPack(obj any) *Pack {
 	if pkg, true := obj.(*Pack); true {
 		return pkg
 	}

@@ -21,7 +21,7 @@ func (h *GZipHandler) Added(ctx channel.HandlerContext) {
 	}
 }
 
-func (h *GZipHandler) Write(ctx channel.HandlerContext, obj interface{}, future channel.Future) {
+func (h *GZipHandler) Write(ctx channel.HandlerContext, obj any, future channel.Future) {
 	pack := _UnPack(obj)
 	if pack == nil {
 		ctx.Write(obj, future)

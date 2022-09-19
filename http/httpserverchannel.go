@@ -44,11 +44,11 @@ func (c *ServerChannel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var pkg = &Pack{
 		Request:  request,
 		Response: NewResponse(request),
-		Params:   map[string]interface{}{},
+		Params:   map[string]any{},
 		Writer:   writer,
 	}
 
-	var obj interface{} = pkg
+	var obj any = pkg
 	cch.FireRead(obj)
 	cch.FireReadCompleted()
 }

@@ -14,8 +14,8 @@ type Session interface {
 	PutString(key string, value string) Session
 	GetInt64(key string) int64
 	PutInt64(key string, value int64) Session
-	GetStruct(key string, obj interface{})
-	PutStruct(key string, value interface{}) Session
+	GetStruct(key string, obj any)
+	PutStruct(key string, value any) Session
 	Clear() Session
 	Delete(key string)
 	Expire() *time.Time
@@ -58,11 +58,11 @@ func (d *DefaultSession) PutInt64(key string, value int64) Session {
 	panic("implement me")
 }
 
-func (d *DefaultSession) GetStruct(key string, obj interface{}) {
+func (d *DefaultSession) GetStruct(key string, obj any) {
 	panic("implement me")
 }
 
-func (d *DefaultSession) PutStruct(key string, value interface{}) Session {
+func (d *DefaultSession) PutStruct(key string, value any) Session {
 	panic("implement me")
 }
 

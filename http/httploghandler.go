@@ -16,10 +16,10 @@ import (
 type LogHandler struct {
 	channel.DefaultHandler
 	printBody  bool
-	FilterFunc func(req *Request, resp *Response, params map[string]interface{}) bool
+	FilterFunc func(req *Request, resp *Response, params map[string]any) bool
 }
 
-var defaultFilter = func(req *Request, resp *Response, params map[string]interface{}) bool { return true }
+var defaultFilter = func(req *Request, resp *Response, params map[string]any) bool { return true }
 
 func NewLogHandler(printBody bool) *LogHandler {
 	handler := LogHandler{}
@@ -28,7 +28,7 @@ func NewLogHandler(printBody bool) *LogHandler {
 	return &handler
 }
 
-func (h *LogHandler) Read(ctx channel.HandlerContext, obj interface{}) {
+func (h *LogHandler) Read(ctx channel.HandlerContext, obj any) {
 	pack := _UnPack(obj)
 	if pack != nil {
 		if !h.FilterFunc(pack.Request, pack.Response, pack.Params) {
@@ -61,7 +61,7 @@ func (h *LogHandler) Read(ctx channel.HandlerContext, obj interface{}) {
 func (h *LogHandler) constructReq(req *Request) *RequestLogStruct {
 	logStruct := RequestLogStruct{
 		Method:  req.Method(),
-		Headers: map[string]interface{}{},
+		Headers: map[string]any{},
 		HOST:    req.Host(),
 		URI:     req.RequestURI(),
 	}
@@ -96,7 +96,7 @@ func (h *LogHandler) constructReq(req *Request) *RequestLogStruct {
 func (h *LogHandler) constructResp(resp *Response) *ResponseLogStruct {
 	logStruct := ResponseLogStruct{
 		StatusCode: resp.StatusCode(),
-		Headers:    map[string]interface{}{},
+		Headers:    map[string]any{},
 		URI:        resp.request.RequestURI(),
 	}
 
@@ -134,7 +134,7 @@ func (h *LogHandler) constructResp(resp *Response) *ResponseLogStruct {
 	return &logStruct
 }
 
-func (h *LogHandler) Write(ctx channel.HandlerContext, obj interface{}, future channel.Future) {
+func (h *LogHandler) Write(ctx channel.HandlerContext, obj any, future channel.Future) {
 	pack := _UnPack(obj)
 	if pack == nil {
 		ctx.Write(obj, future)
@@ -142,7 +142,7 @@ func (h *LogHandler) Write(ctx channel.HandlerContext, obj interface{}, future c
 	}
 
 	req, resp, params := pack.Request, pack.Response, pack.Params
-	//go func(cid string, req *Request, resp *Response, params map[string]interface{}) {
+	//go func(cid string, req *Request, resp *Response, params map[string]any) {
 	if !h.FilterFunc(req, resp, params) {
 		ctx.Write(obj, future)
 		return
@@ -232,23 +232,23 @@ type LogStruct struct {
 	HErrorTime      int64              `json:"h_error_time,omitempty"`
 	CompressTime    int64              `json:"compress_time,omitempty"`
 	ProcessTime     int64              `json:"process_time,omitempty"`
-	Extend          interface{}        `json:"extend,omitempty"`
+	Extend          any                `json:"extend,omitempty"`
 }
 
 type RequestLogStruct struct {
-	URI        string                 `json:"uri,omitempty"`
-	Method     string                 `json:"method,omitempty"`
-	Headers    map[string]interface{} `json:"headers,omitempty"`
-	HOST       string                 `json:"host,omitempty"`
-	Body       string                 `json:"body,omitempty"`
-	BodyLength int                    `json:"body_length,omitempty"`
+	URI        string         `json:"uri,omitempty"`
+	Method     string         `json:"method,omitempty"`
+	Headers    map[string]any `json:"headers,omitempty"`
+	HOST       string         `json:"host,omitempty"`
+	Body       string         `json:"body,omitempty"`
+	BodyLength int            `json:"body_length,omitempty"`
 }
 
 type ResponseLogStruct struct {
-	URI               string                 `json:"uri,omitempty"`
-	StatusCode        int                    `json:"status_code,omitempty"`
-	Headers           map[string]interface{} `json:"headers,omitempty"`
-	Body              string                 `json:"body,omitempty"`
-	OutBodyLength     int                    `json:"out_body_length,omitempty"`
-	PreCompressLength int                    `json:"pre_compress_length,omitempty"`
+	URI               string         `json:"uri,omitempty"`
+	StatusCode        int            `json:"status_code,omitempty"`
+	Headers           map[string]any `json:"headers,omitempty"`
+	Body              string         `json:"body,omitempty"`
+	OutBodyLength     int            `json:"out_body_length,omitempty"`
+	PreCompressLength int            `json:"pre_compress_length,omitempty"`
 }

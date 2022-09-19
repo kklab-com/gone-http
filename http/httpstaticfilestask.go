@@ -56,7 +56,7 @@ func NewStaticFilesHandlerTask(folderPath string) *StaticFilesHandlerTask {
 	return s
 }
 
-func (h *StaticFilesHandlerTask) Get(ctx channel.HandlerContext, req *Request, resp *Response, params map[string]interface{}) ErrorResponse {
+func (h *StaticFilesHandlerTask) Get(ctx channel.HandlerContext, req *Request, resp *Response, params map[string]any) ErrorResponse {
 	path := fmt.Sprintf("%s/%s", h.FolderPath, strings.ReplaceAll(req.Url().Path, "../", "/"))
 	if entity, err := h._Load(path); entity != nil {
 		resp.SetStatusCode(httpstatus.OK)

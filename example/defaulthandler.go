@@ -14,13 +14,13 @@ type DefaultTask struct {
 	http.DefaultHTTPHandlerTask
 }
 
-func (l *DefaultTask) Get(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]interface{}) http.ErrorResponse {
+func (l *DefaultTask) Get(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]any) http.ErrorResponse {
 	resp.SetStatusCode(httpstatus.OK)
 	resp.TextResponse(buf.NewByteBuf([]byte("feeling good")))
 	return nil
 }
 
-func (l *DefaultTask) Post(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]interface{}) http.ErrorResponse {
+func (l *DefaultTask) Post(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]any) http.ErrorResponse {
 	return l.Get(ctx, req, resp, params)
 }
 
@@ -28,7 +28,7 @@ type DefaultHomeTask struct {
 	http.DefaultHTTPHandlerTask
 }
 
-func (l *DefaultHomeTask) Get(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]interface{}) http.ErrorResponse {
+func (l *DefaultHomeTask) Get(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]any) http.ErrorResponse {
 	resp.SetStatusCode(httpstatus.OK)
 	resp.TextResponse(buf.NewByteBuf([]byte(req.RequestURI())))
 	go func() {
@@ -47,7 +47,7 @@ type LongTask struct {
 	http.DefaultHTTPHandlerTask
 }
 
-func (l *LongTask) Get(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]interface{}) http.ErrorResponse {
+func (l *LongTask) Get(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]any) http.ErrorResponse {
 	resp.SetStatusCode(httpstatus.OK)
 	resp.TextResponse(buf.NewByteBufString(longMsg + req.FormValue("v")))
 	return nil
@@ -57,7 +57,7 @@ type CloseTask struct {
 	http.DefaultHTTPHandlerTask
 }
 
-func (l *CloseTask) Get(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]interface{}) http.ErrorResponse {
+func (l *CloseTask) Get(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]any) http.ErrorResponse {
 	resp.SetStatusCode(httpstatus.OK)
 	resp.TextResponse(buf.NewByteBuf([]byte(req.RequestURI())))
 	go func() {
@@ -72,7 +72,7 @@ type Routine struct {
 	http.DefaultHTTPHandlerTask
 }
 
-func (a *Routine) Index(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]interface{}) http.ErrorResponse {
+func (a *Routine) Index(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]any) http.ErrorResponse {
 	buffer := buf.EmptyByteBuf()
 	pprof.Lookup("goroutine").WriteTo(buffer, 1)
 	resp.TextResponse(buffer)

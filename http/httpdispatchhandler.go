@@ -21,19 +21,19 @@ type DispatchHandler struct {
 	channel.DefaultHandler
 	route                 Route
 	DefaultStatusCode     int
-	DefaultStatusResponse map[int]func(req *Request, resp *Response, params map[string]interface{})
+	DefaultStatusResponse map[int]func(req *Request, resp *Response, params map[string]any)
 }
 
 func NewDispatchHandler(route Route) *DispatchHandler {
-	return &DispatchHandler{route: route, DefaultStatusCode: 200, DefaultStatusResponse: map[int]func(req *Request, resp *Response, params map[string]interface{}){}}
+	return &DispatchHandler{route: route, DefaultStatusCode: 200, DefaultStatusResponse: map[int]func(req *Request, resp *Response, params map[string]any){}}
 }
 
-func (h *DispatchHandler) defaultNotFound404(req *Request, resp *Response, params map[string]interface{}) {
+func (h *DispatchHandler) defaultNotFound404(req *Request, resp *Response, params map[string]any) {
 	resp.SetStatusCode(httpstatus.NotFound)
 	resp.SetBody(buf.NewByteBuf([]byte("<html><img src='https://http.cat/404' /></html>")))
 }
 
-func (h *DispatchHandler) Read(ctx channel.HandlerContext, obj interface{}) {
+func (h *DispatchHandler) Read(ctx channel.HandlerContext, obj any) {
 	pack := _UnPack(obj)
 	if pack == nil {
 		ctx.FireRead(obj)
@@ -127,7 +127,7 @@ func (h *DispatchHandler) Read(ctx channel.HandlerContext, obj interface{}) {
 	}
 }
 
-func (h *DispatchHandler) callWrite(ctx channel.HandlerContext, obj interface{}) {
+func (h *DispatchHandler) callWrite(ctx channel.HandlerContext, obj any) {
 	pack := _UnPack(obj)
 	if ff, f := h.DefaultStatusResponse[pack.Response.StatusCode()]; f {
 		if pack.Response.body.ReadableBytes() == 0 {
@@ -142,7 +142,7 @@ func (h *DispatchHandler) callWrite(ctx channel.HandlerContext, obj interface{})
 	ctx.Write(obj, pack.Response.done).Sync()
 }
 
-func (h *DispatchHandler) _PanicCatch(ctx channel.HandlerContext, request *Request, response *Response, task HttpHandlerTask, params map[string]interface{}, rtnCatch *ReturnCatch) {
+func (h *DispatchHandler) _PanicCatch(ctx channel.HandlerContext, request *Request, response *Response, task HttpHandlerTask, params map[string]any, rtnCatch *ReturnCatch) {
 	erErr := rtnCatch.err
 	timeMark := time.Now()
 	var err error
@@ -197,7 +197,7 @@ type ReturnCatch struct {
 	err ErrorResponse
 }
 
-func (h *DispatchHandler) invokeMethod(ctx channel.HandlerContext, task HttpHandlerTask, request *Request, response *Response, params map[string]interface{}, isLast bool) ErrorResponse {
+func (h *DispatchHandler) invokeMethod(ctx channel.HandlerContext, task HttpHandlerTask, request *Request, response *Response, params map[string]any, isLast bool) ErrorResponse {
 	if err := task.PreCheck(request, response, params); err != nil {
 		return err
 	}
@@ -291,11 +291,11 @@ func (h *DispatchHandler) _UpdateSessionCookie(resp *Response) {
 }
 
 type ObjectLogStruct struct {
-	ChannelID  string      `json:"cid,omitempty"`
-	TrackID    string      `json:"tid,omitempty"`
-	State      string      `json:"state,omitempty"`
-	Handler    string      `json:"handler,omitempty"`
-	URI        string      `json:"uri,omitempty"`
-	Message    interface{} `json:"message,omitempty"`
-	RemoteAddr string      `json:"remote_addr,omitempty"`
+	ChannelID  string `json:"cid,omitempty"`
+	TrackID    string `json:"tid,omitempty"`
+	State      string `json:"state,omitempty"`
+	Handler    string `json:"handler,omitempty"`
+	URI        string `json:"uri,omitempty"`
+	Message    any    `json:"message,omitempty"`
+	RemoteAddr string `json:"remote_addr,omitempty"`
 }

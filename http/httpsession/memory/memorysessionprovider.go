@@ -30,7 +30,7 @@ func (s *MemSessionProvider) NewSession(expire *time.Time) httpsession.Session {
 
 func (s *MemSessionProvider) Sessions() map[string]httpsession.Session {
 	sessions := map[string]httpsession.Session{}
-	s.sessions.Range(func(key, value interface{}) bool {
+	s.sessions.Range(func(key, value any) bool {
 		sessions[key.(string)] = value.(httpsession.Session)
 		return true
 	})
