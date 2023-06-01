@@ -4,9 +4,15 @@ import "fmt"
 
 type Acceptance interface {
 	Do(req *Request, resp *Response, params map[string]any) error
+	SkipMethodOptions() bool
 }
 
 type DispatchAcceptance struct {
+}
+
+// SkipMethodOptions helpful for CORS xhr preflight
+func (a *DispatchAcceptance) SkipMethodOptions() bool {
+	return false
 }
 
 func (a *DispatchAcceptance) Do(req *Request, resp *Response, params map[string]any) error {
