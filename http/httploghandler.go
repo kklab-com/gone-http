@@ -3,7 +3,6 @@ package http
 import (
 	"compress/gzip"
 	"fmt"
-	"io/ioutil"
 	"strings"
 	"time"
 
@@ -13,10 +12,13 @@ import (
 	"github.com/kklab-com/goth-kklogger"
 )
 
+const LogHandlerDefaultMaxBodySize = 204800
+
 type LogHandler struct {
 	channel.DefaultHandler
-	printBody  bool
-	FilterFunc func(req *Request, resp *Response, params map[string]any) bool
+	printBody   bool
+	MaxBodySize int
+	FilterFunc  func(req *Request, resp *Response, params map[string]any) bool
 }
 
 var defaultFilter = func(req *Request, resp *Response, params map[string]any) bool { return true }
@@ -24,6 +26,7 @@ var defaultFilter = func(req *Request, resp *Response, params map[string]any) bo
 func NewLogHandler(printBody bool) *LogHandler {
 	handler := LogHandler{}
 	handler.printBody = printBody
+	handler.MaxBodySize = LogHandlerDefaultMaxBodySize
 	handler.FilterFunc = defaultFilter
 	return &handler
 }
@@ -85,7 +88,12 @@ func (h *LogHandler) constructReq(req *Request) *RequestLogStruct {
 
 	bodyLength := 0
 	if h.printBody {
-		logStruct.Body = string(req.Body().Bytes())
+		if len(req.Body().Bytes()) > h.MaxBodySize {
+			logStruct.Body = string(req.Body().Bytes()[:h.MaxBodySize])
+		} else {
+			logStruct.Body = string(req.Body().Bytes())
+		}
+
 		bodyLength = req.Body().ReadableBytes()
 	}
 
@@ -121,8 +129,13 @@ func (h *LogHandler) constructResp(resp *Response) *ResponseLogStruct {
 		if resp.GetHeader(httpheadername.ContentEncoding) == "gzip" {
 			if reader, err := gzip.NewReader(buf.NewByteBuf(resp.body.Bytes())); err == nil {
 				defer reader.Close()
-				bs, _ := ioutil.ReadAll(reader)
-				logStruct.Body = string(bs)
+				bus := buf.EmptyByteBuf().WriteReader(reader)
+				if len(bus.Bytes()) > h.MaxBodySize {
+					logStruct.Body = string(bus.Bytes()[:h.MaxBodySize])
+				} else {
+					logStruct.Body = string(bus.Bytes())
+				}
+
 				logStruct.PreCompressLength = len(logStruct.Body)
 			}
 		} else {
