@@ -139,7 +139,11 @@ func (h *LogHandler) constructResp(resp *Response) *ResponseLogStruct {
 				logStruct.PreCompressLength = len(logStruct.Body)
 			}
 		} else {
-			logStruct.Body = string(resp.body.Bytes())
+			if len(resp.body.Bytes()) > h.MaxBodySize {
+				logStruct.Body = string(resp.body.Bytes()[:h.MaxBodySize])
+			} else {
+				logStruct.Body = string(resp.body.Bytes())
+			}
 		}
 	}
 
