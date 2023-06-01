@@ -68,8 +68,21 @@ func (h *DispatchHandler) Read(ctx channel.HandlerContext, obj any) {
 		defer task.CORSHelper(request, response, params)
 		timeMark = time.Now()
 		for _, acceptance := range node.AggregatedAcceptances() {
+			if request.Method() == httpmethod.OPTIONS && acceptance.SkipMethodOptions() {
+				continue
+			}
+
 			if err := acceptance.Do(request, response, params); err != nil {
 				if err == AcceptanceInterrupt {
+					kklogger.TraceJ("Acceptance", ObjectLogStruct{
+						ChannelID:  ctx.Channel().ID(),
+						TrackID:    request.TrackID(),
+						State:      "Skip",
+						URI:        request.RequestURI(),
+						Handler:    reflect.TypeOf(acceptance).String(),
+						RemoteAddr: request.Request().RemoteAddr,
+					})
+
 					return
 				}
 
