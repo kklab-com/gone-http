@@ -16,10 +16,11 @@ import (
 
 type ServerChannel struct {
 	channel.DefaultNetServerChannel
-	server    *http.Server
-	active    bool
-	newChChan chan *serverChannelAccept
-	chMap     sync.Map
+	server       *http.Server
+	active       bool
+	newChChan    chan *serverChannelAccept
+	chMap        sync.Map
+	maxBodyBytes int64
 }
 
 const ConnCtx = "conn"
@@ -39,7 +40,18 @@ func (c *ServerChannel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if c.maxBodyBytes > 0 {
+		r.Body = http.MaxBytesReader(w, r.Body, c.maxBodyBytes)
+	}
+
 	request := WrapRequest(cch, r)
+	if request == nil {
+		kklogger.WarnJ("http:ServerChannel.ServeHTTP", fmt.Sprintf("conn from %s, target: %s, body is too large", r.RemoteAddr, r.RequestURI))
+		w.WriteHeader(http.StatusRequestEntityTooLarge)
+		w.Write([]byte{})
+		return
+	}
+
 	var writer = w
 	var pkg = &Pack{
 		Request:  request,
@@ -71,6 +83,7 @@ func (c *ServerChannel) UnsafeBind(localAddr net.Addr) error {
 	}
 
 	c.newChChan = make(chan *serverChannelAccept, channel.GetParamIntDefault(c, ParamAcceptWaitCount, 1024))
+	c.maxBodyBytes = channel.GetParamInt64Default(c, ParamMaxBodyBytes, 0)
 	c.server = &http.Server{
 		Addr:              localAddr.String(),
 		Handler:           handler,

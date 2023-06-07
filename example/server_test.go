@@ -187,3 +187,45 @@ func TestServer_Start(t *testing.T) {
 	assert.Equal(t, int32(0), clientCountHandler.regTrigCount)
 	assert.Equal(t, int32(0), clientCountHandler.actTrigCount)
 }
+
+func TestServer_BodyLimit(t *testing.T) {
+	kklogger.SetLogLevel("TRACE")
+	bootstrap := channel.NewServerBootstrap()
+	bootstrap.ChannelType(&http.ServerChannel{})
+	bootstrap.SetParams(http.ParamMaxBodyBytes, 10)
+	bootstrap.Handler(channel.NewInitializer(func(ch channel.Channel) {
+		ch.Pipeline().AddLast("INDICATE_HANDLER_INBOUND", &channel.IndicateHandlerInbound{})
+		ch.Pipeline().AddLast("INDICATE_HANDLER_OUTBOUND", &channel.IndicateHandlerOutbound{})
+	}))
+
+	clientCountHandler := &ServerChildCountHandler{}
+	bootstrap.ChildHandler(channel.NewInitializer(func(ch channel.Channel) {
+		ch.Pipeline().AddLast("CLIENT_COUNT_HANDLER", clientCountHandler)
+		ch.Pipeline().AddLast("INDICATE_HANDLER_INBOUND", &channel.IndicateHandlerInbound{})
+		ch.Pipeline().AddLast("NET_STATUS_INBOUND", &channel.NetStatusInbound{})
+		ch.Pipeline().AddLast("GZIP_HANDLER", new(http.GZipHandler))
+		ch.Pipeline().AddLast("LOG_HANDLER", http.NewLogHandler(false))
+		ch.Pipeline().AddLast("DISPATCHER", http.NewDispatchHandler(NewRoute()))
+		ch.Pipeline().AddLast("NET_STATUS_OUTBOUND", &channel.NetStatusOutbound{})
+		ch.Pipeline().AddLast("INDICATE_HANDLER_OUTBOUND", &channel.IndicateHandlerOutbound{})
+	}))
+
+	ch := bootstrap.Bind(&net.TCPAddr{IP: nil, Port: 18081}).Sync().Channel()
+
+	wg := concurrent.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		request, _ := http2.NewRequest("POST", "http://localhost:18081", buf.NewByteBufString("this is more than 10 characters"))
+		if rtn, err := http2.DefaultClient.Do(request); err != nil {
+			assert.Fail(t, "no")
+		} else {
+			assert.Equal(t, 413, rtn.StatusCode)
+		}
+
+		wg.Done()
+	}()
+
+	wg.Wait()
+	ch.Close()
+	ch.CloseFuture().Sync()
+}

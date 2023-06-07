@@ -3,7 +3,7 @@ package http
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"net"
 	"net/http"
@@ -48,14 +48,18 @@ func WrapRequest(ch channel.Channel, req *http.Request) *Request {
 	if request.request.Body == nil {
 		request.body = buf.EmptyByteBuf()
 	} else {
-		if bs, e := ioutil.ReadAll(request.request.Body); e == nil {
+		if bs, e := io.ReadAll(request.request.Body); e == nil {
 			request.request.Body.Close()
 			request.body = buf.NewByteBuf(bs)
-			request.request.Body = ioutil.NopCloser(buf.NewByteBuf(bs))
+			request.request.Body = io.NopCloser(buf.NewByteBuf(bs))
 		} else {
 			request.request.Body.Close()
+			if _, ok := e.(*http.MaxBytesError); ok {
+				return nil
+			}
+
 			request.body = buf.EmptyByteBuf()
-			request.request.Body = ioutil.NopCloser(buf.EmptyByteBuf())
+			request.request.Body = io.NopCloser(buf.EmptyByteBuf())
 		}
 	}
 
@@ -450,7 +454,7 @@ type Pack struct {
 }
 
 func _UnPack(obj any) *Pack {
-	if pkg, true := obj.(*Pack); true {
+	if pkg, ok := obj.(*Pack); ok {
 		return pkg
 	}
 
