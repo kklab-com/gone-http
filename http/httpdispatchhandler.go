@@ -223,19 +223,23 @@ func (h *DispatchHandler) invokeMethod(ctx channel.HandlerContext, task HttpHand
 		switch {
 		case request.Method() == httpmethod.GET:
 			if isLast {
-				if err := task.Index(ctx, request, response, params); err != nil {
-					if err == NotImplemented {
-						return task.Get(ctx, request, response, params)
-					}
-
+				if err := task.Index(ctx, request, response, params); err == nil {
+					break
+				} else if err != NotImplemented {
 					return err
 				}
-
-				return nil
-			} else {
-				return task.Get(ctx, request, response, params)
 			}
+
+			return task.Get(ctx, request, response, params)
 		case request.Method() == httpmethod.POST:
+			if isLast {
+				if err := task.Create(ctx, request, response, params); err == nil {
+					break
+				} else if err != NotImplemented {
+					return err
+				}
+			}
+
 			return task.Post(ctx, request, response, params)
 		case request.Method() == httpmethod.PUT:
 			return task.Put(ctx, request, response, params)
