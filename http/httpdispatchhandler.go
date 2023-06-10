@@ -224,7 +224,7 @@ func (h *DispatchHandler) invokeMethod(ctx channel.HandlerContext, task HttpHand
 		case request.Method() == httpmethod.GET:
 			if isLast {
 				if err := task.Index(ctx, request, response, params); err == nil {
-					break
+					return nil
 				} else if err != NotImplemented {
 					return err
 				}
@@ -234,7 +234,7 @@ func (h *DispatchHandler) invokeMethod(ctx channel.HandlerContext, task HttpHand
 		case request.Method() == httpmethod.POST:
 			if isLast {
 				if err := task.Create(ctx, request, response, params); err == nil {
-					break
+					return nil
 				} else if err != NotImplemented {
 					return err
 				}
