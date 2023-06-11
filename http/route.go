@@ -8,7 +8,7 @@ import (
 )
 
 type Route interface {
-	RouteEndPoint(req *Request) (node RouteNode, nodeParams map[string]any, isLast bool)
+	RouteNode(path string) (node RouteNode, nodeParams map[string]any, isLast bool)
 }
 
 type DefaultRoute struct {
@@ -23,8 +23,8 @@ func NewRoute() *DefaultRoute {
 	}
 }
 
-func (r *DefaultRoute) RouteEndPoint(req *Request) (node RouteNode, nodeParams map[string]any, isLast bool) {
-	path := strings.TrimLeft(strings.TrimRight(req.Url().Path, "/"), "/")
+func (r *DefaultRoute) RouteNode(path string) (node RouteNode, nodeParams map[string]any, isLast bool) {
+	path = strings.TrimLeft(strings.TrimRight(path, "/"), "/")
 	params := map[string]any{}
 	if path == "" {
 		return r.root, nil, true

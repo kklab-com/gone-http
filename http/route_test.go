@@ -27,7 +27,7 @@ func TestRestRoute_RouteEndPoint(t *testing.T) {
 								AddEndPoint(NewEndPoint("info", new(DefaultHandlerTask), nil))))),
 	)
 
-	point, m, isLast := route.RouteEndPoint(&req)
+	point, m, isLast := route.RouteNode(req.Url().Path)
 	println(point.Name())
 	for k, v := range m {
 		println(fmt.Sprintf("%s: %s", k, v))
@@ -39,7 +39,7 @@ func TestRestRoute_RouteEndPoint(t *testing.T) {
 
 	println("----")
 	req.Request().URL.Path = "/auth/group/user/123"
-	point, m, isLast = route.RouteEndPoint(&req)
+	point, m, isLast = route.RouteNode(req.Url().Path)
 	println(point.Name())
 	for k, v := range m {
 		println(fmt.Sprintf("%s: %s", k, v))
@@ -51,7 +51,7 @@ func TestRestRoute_RouteEndPoint(t *testing.T) {
 
 	println("----")
 	req.Request().URL.Path = "/auth/group/user/123/book"
-	point, m, isLast = route.RouteEndPoint(&req)
+	point, m, isLast = route.RouteNode(req.Url().Path)
 	println(point.Name())
 	for k, v := range m {
 		println(fmt.Sprintf("%s: %s", k, v))
@@ -63,7 +63,7 @@ func TestRestRoute_RouteEndPoint(t *testing.T) {
 
 	println("----")
 	req.Request().URL.Path = "/auth/group/user/123/book/newbook"
-	point, m, isLast = route.RouteEndPoint(&req)
+	point, m, isLast = route.RouteNode(req.Url().Path)
 	println(point.Name())
 	for k, v := range m {
 		println(fmt.Sprintf("%s: %s", k, v))
@@ -75,7 +75,7 @@ func TestRestRoute_RouteEndPoint(t *testing.T) {
 
 	println("----")
 	req.Request().URL.Path = "/auth/group/user"
-	point, m, isLast = route.RouteEndPoint(&req)
+	point, m, isLast = route.RouteNode(req.Url().Path)
 	println(point.Name())
 	for k, v := range m {
 		println(fmt.Sprintf("%s: %s", k, v))
@@ -87,7 +87,7 @@ func TestRestRoute_RouteEndPoint(t *testing.T) {
 
 	println("----")
 	req.Request().URL.Path = "/auth/group/user/123/profile/info/myname"
-	point, m, isLast = route.RouteEndPoint(&req)
+	point, m, isLast = route.RouteNode(req.Url().Path)
 	println(point.Name())
 	for k, v := range m {
 		println(fmt.Sprintf("%s: %s", k, v))
@@ -99,5 +99,5 @@ func TestRestRoute_RouteEndPoint(t *testing.T) {
 
 	println("----")
 	req.Request().URL.Path = "/auth/group/user/123/book/newbook/dasdqwe"
-	point, m, isLast = route.RouteEndPoint(&req)
+	point, m, isLast = route.RouteNode(req.Url().Path)
 }
