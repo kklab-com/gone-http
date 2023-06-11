@@ -208,7 +208,7 @@ func (r *SimpleRoute) RouteNode(path string) (node RouteNode, parameters map[str
 					if current == r.root && part != "" {
 						return nil, nil, false
 					} else {
-						params[fmt.Sprintf("%s_id", current.Name())] = part
+						params[fmt.Sprintf("[gone-http]%s_id", current.Name())] = part
 						return current, params, false
 					}
 				} else {
@@ -217,7 +217,7 @@ func (r *SimpleRoute) RouteNode(path string) (node RouteNode, parameters map[str
 			} else {
 				if next == nil {
 					if _, f := current.Resources()[parts[idx+1]]; f {
-						params[fmt.Sprintf("%s_id", current.Name())] = part
+						params[fmt.Sprintf("[gone-http]%s_id", current.Name())] = part
 						continue
 					} else {
 						return nil, nil, false

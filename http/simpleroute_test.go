@@ -44,7 +44,7 @@ func TestSimpleRoute_Route(t *testing.T) {
 	req.Request().URL.Path = "/auth/group/user/123"
 	point, m, isLast = route.RouteNode(req.Url().Path)
 	assert.False(t, isLast)
-	assert.Equal(t, "123", m["user_id"])
+	assert.Equal(t, "123", m["[gone-http]user_id"])
 	assert.Equal(t, "user", point.Name())
 	assert.Equal(t, 1, len(point.AggregatedAcceptances()))
 	assert.IsType(t, &acceptance400{}, point.AggregatedAcceptances()[0])
@@ -61,7 +61,7 @@ func TestSimpleRoute_Route(t *testing.T) {
 	req.Request().URL.Path = "/auth/group/user/123/book"
 	point, m, isLast = route.RouteNode(req.Url().Path)
 	assert.True(t, isLast)
-	assert.Equal(t, "123", m["user_id"])
+	assert.Equal(t, "123", m["[gone-http]user_id"])
 	assert.Equal(t, "book", point.Name())
 	assert.Equal(t, "user", point.Parent().Name())
 	assert.Equal(t, "group", point.Parent().Parent().Name())
@@ -83,8 +83,8 @@ func TestSimpleRoute_Route(t *testing.T) {
 	req.Request().URL.Path = "/auth/group/user/123/book/newbook"
 	point, m, isLast = route.RouteNode(req.Url().Path)
 	assert.False(t, isLast)
-	assert.Equal(t, "newbook", m["book_id"])
-	assert.Equal(t, "123", m["user_id"])
+	assert.Equal(t, "newbook", m["[gone-http]book_id"])
+	assert.Equal(t, "123", m["[gone-http]user_id"])
 	assert.Equal(t, "book", point.Name())
 	assert.Equal(t, "user", point.Parent().Name())
 	assert.Equal(t, "group", point.Parent().Parent().Name())
@@ -124,8 +124,8 @@ func TestSimpleRoute_Route(t *testing.T) {
 	req.Request().URL.Path = "/auth/group/user/123/profile/info/myname"
 	point, m, isLast = route.RouteNode(req.Url().Path)
 	assert.False(t, isLast)
-	assert.Equal(t, "myname", m["info_id"])
-	assert.Equal(t, "123", m["user_id"])
+	assert.Equal(t, "myname", m["[gone-http]info_id"])
+	assert.Equal(t, "123", m["[gone-http]user_id"])
 	assert.Equal(t, "profile", point.Parent().Name())
 	assert.Equal(t, "user", point.Parent().Parent().Name())
 	assert.Equal(t, RouteTypeEndPoint, point.Parent().Parent().RouteType())
