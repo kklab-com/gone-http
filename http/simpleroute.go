@@ -83,8 +83,9 @@ func (r *SimpleRoute) String() string {
 	return string(marshal)
 }
 
-func (r *SimpleRoute) SetRoot(handler HandlerTask) *SimpleRoute {
+func (r *SimpleRoute) SetRoot(handler HandlerTask, acceptances ...Acceptance) *SimpleRoute {
 	r.root.(*_SimpleNode).handler = handler
+	r.root.(*_SimpleNode).acceptances = acceptances
 	return r
 }
 
