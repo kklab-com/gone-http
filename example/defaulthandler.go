@@ -1,6 +1,7 @@
 package example
 
 import (
+	erresponse "github.com/kklab-com/goth-erresponse"
 	"runtime/pprof"
 	"time"
 
@@ -77,4 +78,12 @@ func (a *Routine) Index(ctx channel.HandlerContext, req *http.Request, resp *htt
 	pprof.Lookup("goroutine").WriteTo(buffer, 1)
 	resp.TextResponse(buffer)
 	return nil
+}
+
+type Acceptance400 struct {
+	http.DispatchAcceptance
+}
+
+func (a *Acceptance400) Do(req *http.Request, resp *http.Response, params map[string]any) error {
+	return erresponse.InvalidRequest
 }

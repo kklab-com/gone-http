@@ -20,6 +20,7 @@ func NewRoute() *Route {
 		AddEndPoint(http.NewEndPoint("routine", new(Routine), nil)).
 		AddEndPoint(http.NewEndPoint("long", longTask, nil)).
 		AddEndPoint(http.NewEndPoint("close", new(CloseTask), nil)).
+		AddEndPoint(http.NewEndPoint("400", new(Routine), []http.Acceptance{new(Acceptance400)})).
 		AddGroup(http.NewGroup("v1", []http.Acceptance{}).
 			AddEndPoint(http.NewEndPoint("home", homepage, nil)),
 		)

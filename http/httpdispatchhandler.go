@@ -41,7 +41,6 @@ func (h *DispatchHandler) Read(ctx channel.HandlerContext, obj any) {
 	}
 
 	request, response, params := pack.Request, pack.Response, pack.Params
-	response.SetStatusCode(h.DefaultStatusCode)
 	timeMark := time.Now()
 	if node, nodeParams, isLast := h.route.RouteNode(request.Url().Path); node != nil && node.RouteType() != RouteTypeGroup {
 		pack.RouteNode = node
@@ -97,6 +96,12 @@ func (h *DispatchHandler) Read(ctx channel.HandlerContext, obj any) {
 					RemoteAddr: request.Request().RemoteAddr,
 				})
 
+				if cast, ok := err.(ErrorResponse); ok {
+					if response.statusCode == 0 {
+						response.ResponseError(cast)
+					}
+				}
+
 				return
 			} else {
 				if kklogger.GetLogLevel() < kklogger.TraceLevel {
@@ -150,6 +155,10 @@ func (h *DispatchHandler) callWrite(ctx channel.HandlerContext, obj any) {
 		if pack.Response.body.ReadableBytes() == 0 {
 			h.defaultNotFound404(pack.Request, pack.Response, pack.Params)
 		}
+	}
+
+	if pack.Response.StatusCode() == 0 {
+		pack.Response.SetStatusCode(h.DefaultStatusCode)
 	}
 
 	ctx.Write(obj, pack.Response.done).Sync()

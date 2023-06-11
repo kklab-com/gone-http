@@ -93,6 +93,7 @@ func TestServer_Start(t *testing.T) {
 						assert.Fail(t, "len should not be zero")
 					}
 
+					assert.Equal(t, 200, rtn.StatusCode)
 					assert.EqualValues(t, longMsg+v, string(bs))
 				} else {
 					assert.EqualValues(t, longMsg+v, string(buf.EmptyByteBuf().WriteReader(rtn.Body).Bytes()))
@@ -120,6 +121,7 @@ func TestServer_Start(t *testing.T) {
 			if rtn, err := http2.DefaultClient.Get("http://localhost:18080/home"); err != nil {
 				assert.Fail(t, err.Error())
 			} else {
+				assert.Equal(t, 200, rtn.StatusCode)
 				assert.EqualValues(t, "/home", string(buf.EmptyByteBuf().WriteReader(rtn.Body).Bytes()))
 			}
 
@@ -133,6 +135,7 @@ func TestServer_Start(t *testing.T) {
 			if rtn, err := http2.DefaultClient.Get("http://localhost:18080/v1/home"); err != nil {
 				assert.Fail(t, err.Error())
 			} else {
+				assert.Equal(t, 200, rtn.StatusCode)
 				assert.EqualValues(t, "/v1/home", string(buf.EmptyByteBuf().WriteReader(rtn.Body).Bytes()))
 			}
 
@@ -153,6 +156,17 @@ func TestServer_Start(t *testing.T) {
 		}()
 	}
 
+	go func() {
+		wg.Add(1)
+		if rtn, err := http2.DefaultClient.Get("http://localhost:18080/400"); err != nil {
+			assert.Fail(t, err.Error())
+		} else {
+			assert.EqualValues(t, 400, rtn.StatusCode)
+		}
+
+		wg.Done()
+	}()
+
 	wg.Wait()
 
 	for i := 0; i < 50; i++ {
@@ -164,6 +178,7 @@ func TestServer_Start(t *testing.T) {
 			if rtn, err := http2.DefaultClient.Do(request); err != nil {
 				assert.Fail(t, err.Error())
 			} else {
+				assert.Equal(t, 200, rtn.StatusCode)
 				assert.EqualValues(t, "feeling good", string(buf.EmptyByteBuf().WriteReader(rtn.Body).Bytes()))
 			}
 
@@ -175,6 +190,7 @@ func TestServer_Start(t *testing.T) {
 	if rtn, err := http2.DefaultClient.Get("http://localhost:18080/close"); err != nil {
 		assert.Fail(t, err.Error())
 	} else {
+		assert.Equal(t, 200, rtn.StatusCode)
 		assert.EqualValues(t, "/close", string(buf.EmptyByteBuf().WriteReader(rtn.Body).Bytes()))
 	}
 

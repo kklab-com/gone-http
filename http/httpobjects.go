@@ -319,7 +319,7 @@ func (r *Response) Request() *Request {
 func NewResponse(request *Request) *Response {
 	response := &Response{}
 	response.request = request
-	response.statusCode = httpstatus.OK
+	response.statusCode = 0
 	response.header = map[string][]string{}
 	response.cookies = map[string][]http.Cookie{}
 	response.body = buf.EmptyByteBuf()
