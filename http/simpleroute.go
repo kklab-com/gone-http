@@ -89,10 +89,50 @@ func (r *SimpleRoute) SetRoot(handler HandlerTask, acceptances ...Acceptance) *S
 	return r
 }
 
+func (r *SimpleRoute) SetGroup(path string, acceptances ...Acceptance) *SimpleRoute {
+	path = strings.TrimLeft(strings.TrimRight(path, "/"), "/")
+	if path == "" {
+		r.root.(*_SimpleNode).acceptances = acceptances
+		return r
+	}
+
+	current := r.root
+	parts := strings.Split(path, "/")
+	partsLen := len(parts)
+	for idx, part := range parts {
+		if strings.Index(part, ":") == 0 {
+			continue
+		}
+
+		if v, f := current.Resources()[part]; f {
+			current = v
+		} else {
+			node := &_SimpleNode{
+				_Node: _Node{
+					parent:    current,
+					name:      part,
+					resources: map[string]RouteNode{},
+					routeType: RouteTypeGroup,
+				},
+			}
+
+			if idx+1 == partsLen {
+				node.acceptances = acceptances
+			}
+
+			current.Resources()[part] = node
+			current = node
+		}
+	}
+
+	return r
+}
+
 func (r *SimpleRoute) SetEndpoint(path string, handler HandlerTask, acceptances ...Acceptance) *SimpleRoute {
 	path = strings.TrimLeft(strings.TrimRight(path, "/"), "/")
 	if path == "" {
 		r.root.(*_SimpleNode).handler = handler
+		r.root.(*_SimpleNode).acceptances = acceptances
 		return r
 	}
 
