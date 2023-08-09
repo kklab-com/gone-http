@@ -52,6 +52,7 @@ func (h *LogHandler) Read(ctx channel.HandlerContext, obj any) {
 				r := sb.String()
 				return r[:len(r)-2]
 			}(pack.Request.RemoteAddrs()),
+			URI:     pack.Request.RequestURI(),
 			Request: h.constructReq(pack.Request),
 		}
 
@@ -229,6 +230,7 @@ type ReadRequestLogStruct struct {
 	TrackID     string            `json:"tid,omitempty"`
 	RemoteAddr  string            `json:"remote_addr,omitempty"`
 	RemoteAddrs string            `json:"remote_addrs,omitempty"`
+	URI         string            `json:"uri,omitempty"`
 	Request     *RequestLogStruct `json:"request"`
 }
 
