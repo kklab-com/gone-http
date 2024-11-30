@@ -83,8 +83,8 @@ github.com/kklab-com/goth-bytebuf v1.0.1 h1:ozcyL8fJ7EBlnMshepYTWOZbbf6icsrtiisE
 github.com/kklab-com/goth-bytebuf v1.0.1/go.mod h1:H14vt2RptXUFR/+TVGF1TQFra5CAdOUZRI3NEPvv/G4=
 github.com/kklab-com/goth-concurrent v1.2.0 h1:lNCs1Vw+qn5vIFC4QCY08mcVTq+7nwzbc3jHptK1nSY=
 github.com/kklab-com/goth-concurrent v1.2.0/go.mod h1:b85JK3KHXZCj55Tq/L6sHJqmgduhWdwj1i/8pZUHxlA=
-github.com/kklab-com/goth-erresponse v1.0.0 h1:xuISnShxXA+rgYwMPwVzj5DL0pMDbdXObtJOj9iAEqk=
-github.com/kklab-com/goth-erresponse v1.0.0/go.mod h1:dicPvRSKG8bvUV9Z/GM/FLbLlUCm0a2NYoDkM/HbXHU=
+github.com/kklab-com/goth-erresponse v1.0.1 h1:/PkmqUI6hL3Ca09Yr2zJZX7GYU5LQivixv1wlY4HZ5Q=
+github.com/kklab-com/goth-erresponse v1.0.1/go.mod h1:dicPvRSKG8bvUV9Z/GM/FLbLlUCm0a2NYoDkM/HbXHU=
 github.com/kklab-com/goth-kkdatastore v0.0.0-20220207053650-75eea60fcd9b h1:B9Xwkt5whQVi5vVTIxnY93N7YoZvX2XqDVakL3BAO34=
 github.com/kklab-com/goth-kkdatastore v0.0.0-20220207053650-75eea60fcd9b/go.mod h1:wQ+ZTRR1hOZid2eQz7bk4nbSwxo5abWGmPIA2lFuSM0=
 github.com/kklab-com/goth-kkerror v0.0.0-20210329135318-f6c51d7cfc8c h1:3H690Rwgvhcfh4WEtWJXqmqutp0PcKSmCGYs4nWIOO8=

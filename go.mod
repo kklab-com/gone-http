@@ -10,7 +10,7 @@ require (
 	github.com/kklab-com/goth-base62 v1.0.0
 	github.com/kklab-com/goth-bytebuf v1.0.1
 	github.com/kklab-com/goth-concurrent v1.2.0
-	github.com/kklab-com/goth-erresponse v1.0.0
+	github.com/kklab-com/goth-erresponse v1.0.1
 	github.com/kklab-com/goth-kkdatastore v0.0.0-20220207053650-75eea60fcd9b
 	github.com/kklab-com/goth-kklogger v1.0.1
 	github.com/kklab-com/goth-kkutil v1.3.2
