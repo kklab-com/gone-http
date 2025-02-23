@@ -24,7 +24,32 @@ func (c *Channel) UnsafeWrite(obj any) error {
 	}
 
 	response := pack.Response
-	if !response.headerWritten {
+	if pack.writeSeparateMode {
+		if !response.headerWritten {
+			for key, values := range response.header {
+				pack.Writer.Header().Del(key)
+				for _, value := range values {
+					pack.Writer.Header().Add(key, value)
+				}
+			}
+
+			for _, value := range response.cookies {
+				for _, cookie := range value {
+					http.SetCookie(pack.Writer, &cookie)
+				}
+			}
+
+			pack.Writer.WriteHeader(response.statusCode)
+			response.headerWritten = true
+		} else {
+			_, err := pack.Writer.Write(response.Body().Bytes())
+			if flusher, ok := pack.Writer.(http.Flusher); ok {
+				flusher.Flush()
+			}
+
+			return err
+		}
+	} else {
 		for key, values := range response.header {
 			pack.Writer.Header().Del(key)
 			for _, value := range values {
@@ -39,16 +64,7 @@ func (c *Channel) UnsafeWrite(obj any) error {
 		}
 
 		pack.Writer.WriteHeader(response.statusCode)
-	}
-
-	if pack.writeSeparateMode && !response.headerWritten {
-		response.headerWritten = true
-	} else {
 		_, err := pack.Writer.Write(response.Body().Bytes())
-		if flusher, ok := pack.Writer.(http.Flusher); ok {
-			flusher.Flush()
-		}
-
 		return err
 	}
 
