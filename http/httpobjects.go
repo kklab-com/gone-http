@@ -289,13 +289,14 @@ func (r *Request) Origin() string {
 }
 
 type Response struct {
-	response   *http.Response
-	request    *Request
-	statusCode int
-	header     http.Header
-	cookies    map[string][]http.Cookie
-	body       buf.ByteBuf
-	done       channel.Future
+	response      *http.Response
+	request       *Request
+	statusCode    int
+	header        http.Header
+	cookies       map[string][]http.Cookie
+	body          buf.ByteBuf
+	done          channel.Future
+	headerWritten bool
 }
 
 func WrapResponse(ch channel.NetChannel, response *http.Response) *Response {
@@ -401,8 +402,8 @@ func (r *Response) Cookies() map[string][]http.Cookie {
 	return r.cookies
 }
 
-func (r *Response) Body() []byte {
-	return r.body.Bytes()
+func (r *Response) Body() buf.ByteBuf {
+	return r.body
 }
 
 func (r *Response) SetBody(buf buf.ByteBuf) {
@@ -446,11 +447,12 @@ type ResponseWriter interface {
 }
 
 type Pack struct {
-	Request   *Request       `json:"request"`
-	Response  *Response      `json:"response"`
-	RouteNode RouteNode      `json:"route_node"`
-	Params    map[string]any `json:"params"`
-	Writer    ResponseWriter `json:"writer"`
+	Request           *Request       `json:"request"`
+	Response          *Response      `json:"response"`
+	RouteNode         RouteNode      `json:"route_node"`
+	Params            map[string]any `json:"params"`
+	Writer            ResponseWriter `json:"writer"`
+	writeSeparateMode bool
 }
 
 func _UnPack(obj any) *Pack {

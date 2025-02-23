@@ -2,7 +2,6 @@ package http
 
 import (
 	"fmt"
-
 	"github.com/kklab-com/gone-core/channel"
 	httpheadername "github.com/kklab-com/gone-httpheadername"
 	"github.com/kklab-com/goth-erresponse"
@@ -33,6 +32,11 @@ type HttpHandlerTask interface {
 	Before(req *Request, resp *Response, params map[string]any) ErrorResponse
 	After(req *Request, resp *Response, params map[string]any) ErrorResponse
 	ErrorCaught(req *Request, resp *Response, params map[string]any, err ErrorResponse) error
+}
+
+type SSEOperation interface {
+	WriteHeader(ctx channel.HandlerContext, resp *Response, params map[string]any) channel.Future
+	WriteBody(ctx channel.HandlerContext, resp *Response, params map[string]any) channel.Future
 }
 
 var NotImplemented = erresponse.NotImplemented
@@ -79,6 +83,55 @@ func (h *DefaultHTTPHandlerTask) Trace(ctx channel.HandlerContext, req *Request,
 
 func (h *DefaultHTTPHandlerTask) Connect(ctx channel.HandlerContext, req *Request, resp *Response, params map[string]any) ErrorResponse {
 	return nil
+}
+
+func (h *DefaultHTTPHandlerTask) SSEMode(ctx channel.HandlerContext, req *Request, resp *Response, params map[string]any) SSEOperation {
+	if obj, f := params["[gone-http]context_pack"]; f && obj != nil {
+		response := obj.(*Pack).Response
+		response.SetHeader(httpheadername.ContentType, "text/event-stream")
+		response.SetHeader(httpheadername.CacheControl, "no-cache")
+		response.SetHeader(httpheadername.Connection, "keep-alive")
+		obj.(*Pack).writeSeparateMode = true
+		return _DefaultSSEOperation
+	}
+
+	return nil
+}
+
+var _DefaultSSEOperation = &DefaultSSEOperation{}
+
+type DefaultSSEOperation struct {
+}
+
+func (h *DefaultSSEOperation) WriteHeader(ctx channel.HandlerContext, resp *Response, params map[string]any) channel.Future {
+	if obj, f := params["[gone-http]context_pack"]; f && obj != nil {
+		if dispatcher, f := params["[gone-http]dispatcher"]; f {
+			return dispatcher.(*DispatchHandler).callWriteHeader(ctx, obj)
+		}
+	}
+
+	chCtx := channel.NewFuture(ctx.Channel())
+	chCtx.Completable().Fail(fmt.Errorf("not found pack"))
+	return chCtx
+}
+
+func (h *DefaultSSEOperation) WriteBody(ctx channel.HandlerContext, resp *Response, params map[string]any) channel.Future {
+	if obj, f := params["[gone-http]context_pack"]; f && obj != nil {
+		pack := obj.(*Pack)
+		if !pack.Response.headerWritten {
+			if !h.WriteHeader(ctx, resp, params).IsSuccess() {
+				chCtx := channel.NewFuture(ctx.Channel())
+				chCtx.Completable().Fail(fmt.Errorf("header write error"))
+				return chCtx
+			}
+		}
+
+		return ctx.Write(obj, channel.NewFuture(ctx.Channel()))
+	}
+
+	chCtx := channel.NewFuture(ctx.Channel())
+	chCtx.Completable().Fail(fmt.Errorf("not found pack"))
+	return chCtx
 }
 
 func (h *DefaultHTTPHandlerTask) ThrowErrorResponse(err ErrorResponse) {
