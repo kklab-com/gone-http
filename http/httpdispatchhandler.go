@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -48,6 +49,8 @@ func (h *DispatchHandler) Read(ctx channel.HandlerContext, obj any) {
 		params["[gone-http]node"] = node
 		params["[gone-http]node_name"] = node.Name()
 		params["[gone-http]is_index"] = isLast
+		params["[gone-http]dispatcher"] = h
+		params["[gone-http]context_pack"] = obj
 		if nodeParams != nil {
 			for k, v := range nodeParams {
 				params[k] = v
@@ -145,8 +148,30 @@ func (h *DispatchHandler) Read(ctx channel.HandlerContext, obj any) {
 	}
 }
 
-func (h *DispatchHandler) callWrite(ctx channel.HandlerContext, obj any) {
+func (h *DispatchHandler) callWrite(ctx channel.HandlerContext, obj any) channel.Future {
 	pack := _UnPack(obj)
+	if pack.writeSeparateMode {
+		chCtx := channel.NewFuture(ctx.Channel())
+		chCtx.Completable().Complete(obj)
+		return chCtx
+	}
+
+	return ctx.Write(obj, pack.Response.done).Sync()
+}
+
+func (h *DispatchHandler) callWriteHeader(ctx channel.HandlerContext, obj any) channel.Future {
+	pack := _UnPack(obj)
+	chCtx := channel.NewFuture(ctx.Channel())
+	if pack == nil {
+		chCtx.Completable().Fail(fmt.Errorf("not found pack"))
+		return chCtx
+	}
+
+	if pack.Response.headerWritten {
+		chCtx.Completable().Complete(obj)
+		return chCtx
+	}
+
 	if ff, f := h.DefaultStatusResponse[pack.Response.StatusCode()]; f {
 		if pack.Response.body.ReadableBytes() == 0 {
 			ff(pack.Request, pack.Response, pack.Params)
@@ -161,7 +186,7 @@ func (h *DispatchHandler) callWrite(ctx channel.HandlerContext, obj any) {
 		pack.Response.SetStatusCode(h.DefaultStatusCode)
 	}
 
-	ctx.Write(obj, pack.Response.done).Sync()
+	return ctx.Write(obj, chCtx)
 }
 
 func (h *DispatchHandler) _PanicCatch(ctx channel.HandlerContext, request *Request, response *Response, task HttpHandlerTask, params map[string]any, rtnCatch *ReturnCatch) {
@@ -234,7 +259,7 @@ func (h *DispatchHandler) invokeMethod(ctx channel.HandlerContext, task HttpHand
 			if isLast {
 				if err := task.Index(ctx, request, response, params); err == nil {
 					return nil
-				} else if err != NotImplemented {
+				} else if !errors.Is(err, NotImplemented) {
 					return err
 				}
 			}
@@ -244,7 +269,7 @@ func (h *DispatchHandler) invokeMethod(ctx channel.HandlerContext, task HttpHand
 			if isLast {
 				if err := task.Create(ctx, request, response, params); err == nil {
 					return nil
-				} else if err != NotImplemented {
+				} else if !errors.Is(err, NotImplemented) {
 					return err
 				}
 			}

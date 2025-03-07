@@ -2,12 +2,11 @@ package http
 
 import (
 	"compress/gzip"
-	"strings"
-	"time"
-
 	"github.com/kklab-com/gone-core/channel"
 	"github.com/kklab-com/gone-httpheadername"
 	buf "github.com/kklab-com/goth-bytebuf"
+	"strings"
+	"time"
 )
 
 type GZipHandler struct {
@@ -35,7 +34,7 @@ func (h *GZipHandler) Write(ctx channel.HandlerContext, obj any, future channel.
 		return
 	}
 
-	if response.body.ReadableBytes() < 128 {
+	if response.body.ReadableBytes() < 128 || pack.writeSeparateMode {
 		ctx.Write(obj, future)
 		return
 	}

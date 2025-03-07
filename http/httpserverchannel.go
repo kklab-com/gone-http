@@ -39,7 +39,7 @@ func (c *ServerChannel) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		kklogger.ErrorJ("http:ServerChannel.ServeHTTP", "can't get Channel")
 		return
 	}
-
+	
 	if c.maxBodyBytes > 0 {
 		r.Body = http.MaxBytesReader(w, r.Body, c.maxBodyBytes)
 	}
