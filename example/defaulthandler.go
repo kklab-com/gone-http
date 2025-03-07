@@ -1,6 +1,7 @@
 package example
 
 import (
+	"fmt"
 	erresponse "github.com/kklab-com/goth-erresponse"
 	"runtime/pprof"
 	"time"
@@ -86,4 +87,26 @@ type Acceptance400 struct {
 
 func (a *Acceptance400) Do(req *http.Request, resp *http.Response, params map[string]any) error {
 	return erresponse.InvalidRequest
+}
+
+type SSE struct {
+	http.DefaultHTTPHandlerTask
+}
+
+func (h *SSE) Get(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]any) http.ErrorResponse {
+	sse := h.SSEMode(ctx, req, resp, params)
+	resp.SetHeader("Validate", "true")
+	sse.WriteHeader(ctx, resp.Header(), params)
+	for i := 0; i < 3; i++ {
+		sse.WriteMessage(ctx, http.SSEMessage{Event: "event", Data: []string{fmt.Sprintf("%d", i)}}, params)
+		time.Sleep(time.Millisecond * 300)
+	}
+
+	sse.WriteMessages(ctx, []http.SSEMessage{
+		{Event: "event2", Data: []string{"4"}},
+		{Event: "event2", Data: []string{"5", "5-1"}},
+		{Event: "event2", Data: []string{"6"}},
+	}, params)
+
+	return nil
 }

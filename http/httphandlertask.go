@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/kklab-com/gone-core/channel"
 	httpheadername "github.com/kklab-com/gone-httpheadername"
+	buf "github.com/kklab-com/goth-bytebuf"
 	"github.com/kklab-com/goth-erresponse"
+	"net/http"
 )
 
 type HttpTask interface {
@@ -35,8 +37,9 @@ type HttpHandlerTask interface {
 }
 
 type SSEOperation interface {
-	WriteHeader(ctx channel.HandlerContext, resp *Response, params map[string]any) channel.Future
-	WriteBody(ctx channel.HandlerContext, resp *Response, params map[string]any) channel.Future
+	WriteHeader(ctx channel.HandlerContext, header http.Header, params map[string]any) channel.Future
+	WriteMessage(ctx channel.HandlerContext, message SSEMessage, params map[string]any) channel.Future
+	WriteMessages(ctx channel.HandlerContext, messages []SSEMessage, params map[string]any) channel.Future
 }
 
 var NotImplemented = erresponse.NotImplemented
@@ -91,6 +94,7 @@ func (h *DefaultHTTPHandlerTask) SSEMode(ctx channel.HandlerContext, req *Reques
 		response.SetHeader(httpheadername.ContentType, "text/event-stream")
 		response.SetHeader(httpheadername.CacheControl, "no-cache")
 		response.SetHeader(httpheadername.Connection, "keep-alive")
+		response.SetHeader(httpheadername.TransferEncoding, "identity")
 		obj.(*Pack).writeSeparateMode = true
 		return _DefaultSSEOperation
 	}
@@ -103,10 +107,26 @@ var _DefaultSSEOperation = &DefaultSSEOperation{}
 type DefaultSSEOperation struct {
 }
 
-func (h *DefaultSSEOperation) WriteHeader(ctx channel.HandlerContext, resp *Response, params map[string]any) channel.Future {
+type SSEMessage struct {
+	Comment string   `json:"comment"`
+	Event   string   `json:"event"`
+	Data    []string `json:"data"`
+	Id      string   `json:"id"`
+	Retry   int      `json:"retry"`
+}
+
+func (m SSEMessage) Validate() bool {
+	return !(m.Comment == "" && m.Event == "" && len(m.Data) == 0 && m.Id == "" && m.Retry == 0)
+}
+
+type SSEMessages []SSEMessage
+
+func (h *DefaultSSEOperation) WriteHeader(ctx channel.HandlerContext, header http.Header, params map[string]any) channel.Future {
 	if obj, f := params["[gone-http]context_pack"]; f && obj != nil {
+		pack := obj.(*Pack)
 		if dispatcher, f := params["[gone-http]dispatcher"]; f {
-			return dispatcher.(*DispatchHandler).callWriteHeader(ctx, obj)
+			pack.Response.header = header
+			return dispatcher.(*DispatchHandler).callWriteHeader(ctx, obj).Sync()
 		}
 	}
 
@@ -115,22 +135,79 @@ func (h *DefaultSSEOperation) WriteHeader(ctx channel.HandlerContext, resp *Resp
 	return chCtx
 }
 
-func (h *DefaultSSEOperation) WriteBody(ctx channel.HandlerContext, resp *Response, params map[string]any) channel.Future {
+func (h *DefaultSSEOperation) WriteMessage(ctx channel.HandlerContext, message SSEMessage, params map[string]any) channel.Future {
 	if obj, f := params["[gone-http]context_pack"]; f && obj != nil {
 		pack := obj.(*Pack)
 		if !pack.Response.headerWritten {
-			if !h.WriteHeader(ctx, resp, params).IsSuccess() {
+			if !h.WriteHeader(ctx, pack.Response.Header(), params).IsSuccess() {
 				chCtx := channel.NewFuture(ctx.Channel())
 				chCtx.Completable().Fail(fmt.Errorf("header write error"))
 				return chCtx
 			}
 		}
 
-		return ctx.Write(obj, channel.NewFuture(ctx.Channel()))
+		body := buf.EmptyByteBuf()
+		if message.Comment != "" {
+			body.WriteString(fmt.Sprintf(": %s\n", message.Comment))
+		}
+
+		if message.Event != "" {
+			body.WriteString(fmt.Sprintf("event: %s\n", message.Event))
+		}
+
+		if len(message.Data) > 0 {
+			for _, datum := range message.Data {
+				body.WriteString(fmt.Sprintf("data: %s\n", datum))
+			}
+		}
+
+		if message.Id != "" {
+			body.WriteString(fmt.Sprintf("id: %s\n", message.Id))
+		}
+
+		if message.Retry > 0 {
+			body.WriteString(fmt.Sprintf("retry: %d\n", message.Retry))
+		}
+
+		if body.ReadableBytes() == 0 {
+			chCtx := channel.NewFuture(ctx.Channel())
+			chCtx.Completable().Fail(fmt.Errorf("message is empty"))
+			return chCtx
+		}
+
+		body.WriteByte('\n')
+		pack.Response.SetBody(body)
+		return ctx.Write(obj, channel.NewFuture(ctx.Channel())).Sync()
 	}
 
 	chCtx := channel.NewFuture(ctx.Channel())
 	chCtx.Completable().Fail(fmt.Errorf("not found pack"))
+	return chCtx
+}
+
+func (h *DefaultSSEOperation) WriteMessages(ctx channel.HandlerContext, messages []SSEMessage, params map[string]any) channel.Future {
+	if len(messages) == 0 {
+		chCtx := channel.NewFuture(ctx.Channel())
+		chCtx.Completable().Fail(fmt.Errorf("messages is empty"))
+		return chCtx
+	}
+
+	var chCtx channel.Future
+	for _, message := range messages {
+		if !message.Validate() {
+			chCtx = channel.NewFuture(ctx.Channel())
+			chCtx.Completable().Fail(fmt.Errorf("message is empty"))
+			return chCtx
+		}
+	}
+
+	for _, message := range messages {
+		chCtx = h.WriteMessage(ctx, message, params)
+		if chCtx.IsFail() {
+			return chCtx
+		}
+	}
+
 	return chCtx
 }
 

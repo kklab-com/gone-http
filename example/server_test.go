@@ -167,6 +167,21 @@ func TestServer_Start(t *testing.T) {
 		wg.Done()
 	}()
 
+	go func() {
+		wg.Add(1)
+		if rtn, err := http2.DefaultClient.Get("http://localhost:18080/sse"); err != nil {
+			assert.Fail(t, err.Error())
+		} else {
+			assert.EqualValues(t, 200, rtn.StatusCode)
+			assert.EqualValues(t, "true", rtn.Header.Get("Validate"))
+			time.Sleep(time.Second * 2)
+			expect := "event: event\ndata: 0\n\nevent: event\ndata: 1\n\nevent: event\ndata: 2\n\nevent: event2\ndata: 4\n\nevent: event2\ndata: 5\ndata: 5-1\n\nevent: event2\ndata: 6\n\n"
+			assert.EqualValues(t, expect, string(buf.EmptyByteBuf().WriteReader(rtn.Body).Bytes()))
+		}
+
+		wg.Done()
+	}()
+
 	wg.Wait()
 
 	for i := 0; i < 50; i++ {

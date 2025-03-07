@@ -23,6 +23,10 @@ func (c *Channel) UnsafeWrite(obj any) error {
 		return channel.ErrUnknownObjectType
 	}
 
+	if pack.Response == nil {
+		return nil
+	}
+
 	response := pack.Response
 	if pack.writeSeparateMode {
 		if !response.headerWritten {
