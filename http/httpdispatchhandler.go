@@ -156,6 +156,20 @@ func (h *DispatchHandler) callWrite(ctx channel.HandlerContext, obj any) channel
 		return chCtx
 	}
 
+	if ff, f := h.DefaultStatusResponse[pack.Response.StatusCode()]; f {
+		if pack.Response.body.ReadableBytes() == 0 {
+			ff(pack.Request, pack.Response, pack.Params)
+		}
+	} else if pack.Response.StatusCode() == 404 {
+		if pack.Response.body.ReadableBytes() == 0 {
+			h.defaultNotFound404(pack.Request, pack.Response, pack.Params)
+		}
+	}
+
+	if pack.Response.StatusCode() == 0 {
+		pack.Response.SetStatusCode(h.DefaultStatusCode)
+	}
+
 	return ctx.Write(obj, pack.Response.done).Sync()
 }
 
