@@ -74,7 +74,7 @@ func (h *DispatchHandler) Read(ctx channel.HandlerContext, obj any) {
 				continue
 			}
 
-			if err := acceptance.Do(request, response, params); err != nil {
+			if err := acceptance.Do(ctx, request, response, params); err != nil {
 				if err == AcceptanceInterrupt {
 					kklogger.TraceJ("Acceptance", ObjectLogStruct{
 						ChannelID:  ctx.Channel().ID(),

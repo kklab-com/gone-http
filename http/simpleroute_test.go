@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"github.com/kklab-com/gone-core/channel"
 	erresponse "github.com/kklab-com/goth-erresponse"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -13,7 +14,7 @@ type acceptance400 struct {
 	DispatchAcceptance
 }
 
-func (a *acceptance400) Do(req *Request, resp *Response, params map[string]any) error {
+func (a *acceptance400) Do(ctx channel.HandlerContext, req *Request, resp *Response, params map[string]any) error {
 	return erresponse.InvalidRequest
 }
 

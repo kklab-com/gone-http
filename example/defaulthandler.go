@@ -85,7 +85,7 @@ type Acceptance400 struct {
 	http.DispatchAcceptance
 }
 
-func (a *Acceptance400) Do(req *http.Request, resp *http.Response, params map[string]any) error {
+func (a *Acceptance400) Do(ctx channel.HandlerContext, req *http.Request, resp *http.Response, params map[string]any) error {
 	return erresponse.InvalidRequest
 }
 
